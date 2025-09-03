@@ -79,5 +79,11 @@ public sealed class Test1
         Assert.IsTrue(item.Year.Contains("2005"));
     }
 
-
+    [TestMethod]
+    public async Task TestMethod8()
+    {
+        //Buffy the Vampire Slayer Season 01
+        var response = await ClientFactory.SharedClient.GetSeasonAsync("tt0118276", 1);
+        Assert.AreEqual("Buffy the Vampire Slayer", response.Data.Title, true);
+    }
 }
