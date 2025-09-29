@@ -1,10 +1,13 @@
 ﻿using System;
+using System.Net.Http;
 
 namespace DustyPig.OMDb.Tests;
 
 internal static class ClientFactory
 {
     const string ENV_KEY_VARIABLE = "OMDB_API_KEY";
+
+    private static readonly HttpClient _client = new();
 
     static string GetEnvVar(string name)
     {
@@ -22,7 +25,7 @@ internal static class ClientFactory
     /// <summary>
     /// Don't dispose
     /// </summary>
-    public static Client SharedClient { get; } = new()
+    public static Client SharedClient { get; } = new(_client)
     {
         Throttle = 1000, 
         ApiKey = GetEnvVar(ENV_KEY_VARIABLE),

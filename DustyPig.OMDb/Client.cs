@@ -1,14 +1,14 @@
 ﻿using DustyPig.OMDb.Models;
 using DustyPig.REST;
+using Microsoft.Extensions.Logging;
 using System;
-using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace DustyPig.OMDb;
 
-public class Client : IDisposable
+public class Client
 {
     /// <summary>
     /// As far as I can tell
@@ -22,30 +22,12 @@ public class Client : IDisposable
     private readonly REST.Client _restClient;
 
 
-    /// <summary>
-    /// Creates a configuration that uses its own internal <see cref="HttpClient"/>. When using this constructor, <see cref="Dispose"/> should be called.
-    /// </summary>
-    public Client()
+    public Client(HttpClient httpClient, ILogger<Client>? logger = null)
     {
-        _restClient = new() { BaseAddress = new(API_BASE_ADDRESS) };
+        _restClient = new(httpClient, logger) { BaseAddress = new(API_BASE_ADDRESS) };
     }
 
-
-    /// <summary
-    /// Creates a configurtion that uses a shared <see cref="HttpClient"/>
-    /// </summary
-    /// <param name="httpClient">The shared <see cref="HttpClient"/> this REST configuration should use. Calling dispose will not call dispose on the HttpClient</param>
-    public Client(HttpClient httpClient)
-    {
-        _restClient = new(httpClient) { BaseAddress = new(API_BASE_ADDRESS) };
-    }
-
-    public void Dispose()
-    {
-        _restClient.Dispose();
-        GC.SuppressFinalize(this);
-    }
-
+    
 
 
     public string? ApiKey { get; set; }
@@ -77,33 +59,22 @@ public class Client : IDisposable
     /// <para>
     /// 2. The connection succeeded, but the server sent HttpStatusCode.TooManyRequests (429). 
     ///    In this case, the client will attempt to get the RetryAfter header, and if found, 
-    ///    the delay will be the maximum of the header and the <see cref="RetryDelay"/>. 
-    ///    Otherwise, the retry delay will just be <see cref="RetryDelay"/>.
+    ///    the delay will use that value. If not found, exponential backoff with jitter will be used.
     /// </para>
     /// </remarks>
-    public int RetryCount
+    public ushort RetryCount
     {
         get => _restClient.RetryCount;
         set => _restClient.RetryCount = value;
     }
 
-    /// <summary>
-    /// Number of milliseconds between retries.
-    /// <br />
-    /// Default = 0
-    /// </summary>
-    public int RetryDelay
-    {
-        get => _restClient.RetryDelay;
-        set => _restClient.RetryDelay = value;
-    }
 
     /// <summary>
     /// Minimum number of milliseconds between api calls.
     /// <br />
     /// Default = 0
     /// </summary>
-    public int Throttle
+    public uint Throttle
     {
         get => _restClient.Throttle;
         set => _restClient.Throttle = value;
