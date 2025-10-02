@@ -19,10 +19,17 @@ public class Client
     private const string API_BASE_ADDRESS = "https://www.omdbapi.com/";
     private const string IMG_BASE_ADDRESS = "https://img.omdbapi.com/";
 
+    private static readonly HttpClient _httpClient = new();
     private readonly REST.Client _restClient;
 
 
-    public Client(HttpClient? httpClient = null, ILogger<Client>? logger = null)
+    public Client() : this(null, null) { }
+
+    public Client(HttpClient httpClient) : this(httpClient, null) { }
+
+    public Client(ILogger<Client> logger) : this(null, logger) { }
+    
+    public Client(HttpClient? httpClient, ILogger<Client>? logger)
     {
         _restClient = new(httpClient ?? new(), logger) { BaseAddress = new(API_BASE_ADDRESS) };
     }
