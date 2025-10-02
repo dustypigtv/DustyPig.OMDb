@@ -22,9 +22,9 @@ public class Client
     private readonly REST.Client _restClient;
 
 
-    public Client(HttpClient httpClient, ILogger<Client>? logger = null)
+    public Client(HttpClient? httpClient = null, ILogger<Client>? logger = null)
     {
-        _restClient = new(httpClient, logger) { BaseAddress = new(API_BASE_ADDRESS) };
+        _restClient = new(httpClient ?? new(), logger) { BaseAddress = new(API_BASE_ADDRESS) };
     }
 
     
@@ -57,9 +57,10 @@ public class Client
     /// 1. There is an error connecting to the server (such as a network layer error).
     /// </para>
     /// <para>
-    /// 2. The connection succeeded, but the server sent HttpStatusCode.TooManyRequests (429). 
-    ///    In this case, the client will attempt to get the RetryAfter header, and if found, 
-    ///    the delay will use that value. If not found, exponential backoff with jitter will be used.
+    /// 2. The connection succeeded, but the server sent HttpStatusCode.TooManyRequests
+    ///    (429). In this case, the client will attempt to get the RetryAfter header, and
+    ///    if found, the delay will use that value. If not found, exponential backoff with
+    ///    jitter will be used.
     /// </para>
     /// </remarks>
     public ushort RetryCount
@@ -69,16 +70,6 @@ public class Client
     }
 
 
-    /// <summary>
-    /// Minimum number of milliseconds between api calls.
-    /// <br />
-    /// Default = 0
-    /// </summary>
-    public uint Throttle
-    {
-        get => _restClient.Throttle;
-        set => _restClient.Throttle = value;
-    }
 
 
     private Task<Response<T>> GetByIdInternalAsync<T>(string imdbId, bool fullPlot, CancellationToken cancellationToken)
